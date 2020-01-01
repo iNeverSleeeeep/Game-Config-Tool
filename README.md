@@ -1,5 +1,5 @@
 # Game-Config-Tool
-基于Unity的excel导出配置档工具
+基于Unity和NPOI的excel配置档导出工具
 
 ### 特性
 - xlsx格式配置档。
