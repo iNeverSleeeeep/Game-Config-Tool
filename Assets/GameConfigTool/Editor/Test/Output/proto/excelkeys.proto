@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+import "keywords.proto";
+
+package Config;
+
+message dungeonref {
+    required EDungeonType Type = 1;
+    required uint32 Id = 2;
+}
+message testref {
+    required uint32 ID = 1;
+    required uint32 Subid = 2;
+}

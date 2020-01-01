@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package Config;
+
+enum Keyword {
+    Test1 = 1; // 测试1 describe=测试1描述
+    Test2 = 2; // 测试2 describe=测试2描述
+}
+
+enum KeywordMask {
+    Mask1 = 1; // 哈哈1
+    Mask2 = 2; // 哈哈2
+}
+
+enum EDungeonType {
+    StarDungeon = 1; // 星象副本
+    MatDungeon = 2; // 材料副本
+}

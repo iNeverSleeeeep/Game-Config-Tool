@@ -1,0 +1,22 @@
+syntax = "proto2";
+package Config;
+
+message versioninfo {
+    required string md5 = 1;
+}
+
+message versiontime {
+    required string excel = 1;
+}
+
+message versions {
+    required versioninfo dungeon = 1;
+    required versioninfo reftest = 2;
+    required versioninfo reftestsimple = 3;
+    required versioninfo test = 4;
+}
+
+message differentversions {
+    repeated versiontime list = 1;
+}
+

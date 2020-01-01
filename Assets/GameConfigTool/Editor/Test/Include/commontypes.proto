@@ -1,0 +1,33 @@
+syntax = "proto2";
+
+import "keywords.proto";
+import "excelkeys.proto";
+
+package Config;
+
+message innertype {
+    required uint32 id = 1; // 内部ID
+}
+
+message innerarraytype {
+    repeated innertype types = 1; // 内部内部组
+}
+
+message commontype {
+    required string name = 1; // 名称
+    required uint32 id = 2; // ID
+    required Keyword keyword = 3; // 关键字
+    repeated string namearray = 4; // 名称数组
+    required innertype inner = 5; // 内部类型
+    repeated innertype innerarray = 6; // 内部类型组
+    required innerarraytype innershittype = 7; // 内部复杂类型
+}
+
+message keywordtype {
+    required Keyword word = 1; // 关键字
+}
+
+message exceltype {
+    required testref t = 1; // 关键字
+    required uint32 t2 = 2; // 关键字2 type=reftestsimpleref
+}

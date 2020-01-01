@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+import "keywords.proto";
+import "commontypes.proto";
+import "excelkeys.proto";
+
+package Config;
+
+message test {
+    required uint32 ID = 1;
+    required uint32 Subid = 2;
+    optional string Name = 3;
+    repeated uint32 Array = 4;
+    repeated string Stringarray = 5;
+    optional Keyword Keyword = 6;
+    repeated Keyword Keywordarray = 7;
+    optional KeywordMask Mask = 8;
+    repeated KeywordMask Maskarray = 9;
+    optional commontype Commontype = 10;
+    repeated commontype Commontypearray = 11;
+}
+
+message testlist {
+    repeated test tests = 1;
+    required string md5 = 2;
+}

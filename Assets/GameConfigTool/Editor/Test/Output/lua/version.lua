@@ -1,0 +1,6 @@
+return {
+    dungeon = { md5 = "D27AB3115E6B209288E04C3271D40BFB" },
+    reftest = { md5 = "8F71C986647AD8455DAD22FF5A4CED56" },
+    reftestsimple = { md5 = "15F15D5B6D9EFEED80760C10B3D5A8DD" },
+    test = { md5 = "6853A26413C9F8C2690ECA7EBA45C2B7" },
+}

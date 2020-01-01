@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+import "keywords.proto";
+import "commontypes.proto";
+import "excelkeys.proto";
+
+package Config;
+
+message reftestsimple {
+    required uint32 Id = 1;
+    required uint32 Server = 4;
+    required keywordtype Commontypekeyword = 5;
+    required dungeonref Dungeon1 = 6;
+    required dungeonref Dungeon2 = 7;
+}
+
+message reftestsimplelist {
+    repeated reftestsimple reftestsimples = 1;
+    required string md5 = 2;
+}

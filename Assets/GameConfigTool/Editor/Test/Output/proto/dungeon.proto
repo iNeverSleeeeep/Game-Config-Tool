@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+import "keywords.proto";
+import "commontypes.proto";
+import "excelkeys.proto";
+
+package Config;
+
+message dungeon {
+    required EDungeonType Type = 1;
+    required uint32 Id = 2;
+    required string Name = 3;
+}
+
+message dungeonlist {
+    repeated dungeon dungeons = 1;
+    required string md5 = 2;
+}

@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+import "keywords.proto";
+import "commontypes.proto";
+import "excelkeys.proto";
+
+package Config;
+
+message reftest {
+    required uint32 Id = 1;
+    required testref Excel = 2;
+    required uint32 Simpleexcel = 3;
+    required testref Excel2 = 4;
+    required exceltype Excel3 = 5;
+}
+
+message reftestlist {
+    repeated reftest reftests = 1;
+    required string md5 = 2;
+}
