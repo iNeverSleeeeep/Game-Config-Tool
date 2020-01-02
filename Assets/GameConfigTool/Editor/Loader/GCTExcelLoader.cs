@@ -26,6 +26,8 @@ namespace GCT
             {
                 if (path.Contains("("))
                     subexcel.Add(path);
+                else if (path.Contains("~$")) // 临时文件
+                    continue;
                 else
                     mainexcel.Add(path);
             }
@@ -60,32 +62,55 @@ namespace GCT
             GCTExcel excel = null;
             var sw = new Stopwatch();
             sw.Start();
-            using (var fs = new FileStream(path, FileMode.Open))
+            FileStream fs = null;
+            bool isTempPath = false;
+            try
             {
-                var workbook = new XSSFWorkbook(fs);
-                if (path.Contains("("))
+                fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            } catch
+            {
+            }
+
+            if (fs == null)
+            {
+                File.Copy(path, path + ".tmp.xlsx");
+                fs = new FileStream(path + ".tmp.xlsx", FileMode.Open, FileAccess.Read, FileShare.Read);
+                isTempPath = true;
+            }
+
+            if (fs == null)
+            {
+                Debugger.LogError("打开文件失败:" + Path.GetFileName(path));
+                return;
+            }
+            var workbook = new XSSFWorkbook(fs);
+            if (path.Contains("("))
+            {
+                var name = Path.GetFileNameWithoutExtension(path);
+                name = name.Substring(0, name.IndexOf('('));
+                var datasheet = workbook.GetSheet("data");
+                lock (locker)
                 {
-                    var name = Path.GetFileNameWithoutExtension(path);
-                    name = name.Substring(0, name.IndexOf('('));
-                    var datasheet = workbook.GetSheet("data");
-                    lock (locker)
-                    {
-                        Excels[name].SubDataSheet.Add(datasheet);
-                    }
-                }
-                else
-                {
-                    excel = new GCTExcel();
-                    excel.name = Path.GetFileNameWithoutExtension(path);
-                    excel.path = path;
-                    excel.DataSheet = workbook.GetSheet("data");
-                    excel.SchemaSheet = workbook.GetSheet("schema");
-                    excel.Schema = new GCTSchema(excel.SchemaSheet, excel.DataSheet.GetRow(0));
-                    excel.ConfigSheet = workbook.GetSheet("config");
-                    excel.Config = new GCTConfig(excel.ConfigSheet, excel);
+                    Excels[name].SubDataSheet.Add(datasheet);
                 }
             }
-            
+            else
+            {
+                excel = new GCTExcel();
+                excel.name = Path.GetFileNameWithoutExtension(path);
+                excel.path = path;
+                excel.DataSheet = workbook.GetSheet("data");
+                excel.SchemaSheet = workbook.GetSheet("schema");
+                excel.Schema = new GCTSchema(excel.SchemaSheet, excel.DataSheet.GetRow(0));
+                excel.ConfigSheet = workbook.GetSheet("config");
+                excel.Config = new GCTConfig(excel.ConfigSheet, excel);
+            }
+
+            if (fs != null)
+                fs.Dispose();
+            if (isTempPath)
+                File.Delete(path + ".tmp.xlsx");
+
             sw.Stop();
             Debugger.Log(string.Format("加载{0}完成，耗时{1:N2}秒", Path.GetFileName(path), (float)sw.ElapsedMilliseconds / 1000));
 
