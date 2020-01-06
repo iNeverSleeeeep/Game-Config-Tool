@@ -11,8 +11,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 692fb870e1ae07b4e81bd0d7940c8d81, type: 3}
   m_Name: GCTSettings
   m_EditorClassIdentifier: 
-  ExcelPath: D:\Projects\Game Config Tool\Assets\GameConfigTool\Editor\Test\Excels
-  OutputPath: D:\Projects\Game Config Tool\Assets\GameConfigTool\Editor\Test\Output
-  IncludePath: D:\Projects\Game Config Tool\Assets\GameConfigTool\Editor\Test\Include
-  Protoc: D:\Projects\March\xynet-android\client\impl\protoc-gen-lua\protoc.exe
-  LuaRequirePath: luaConfig.
+  excelPath: GameConfigTool/Editor/Test/Excels
+  outputPath: GameConfigTool/Editor/Test/Output
+  includePath: GameConfigTool/Editor/Test/Include
+  protocPath: ../Tools/protoc.exe
+  luaRequirePath: config.

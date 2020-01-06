@@ -7,5 +7,5 @@ local default = {
     },
 }
 return s(default, { __index = function(t, k)
-    if k == 1 then return require("luaConfig.dungeon0")[k] end
+    if k == 1 then return require("config.dungeon0")[k] end
 end})

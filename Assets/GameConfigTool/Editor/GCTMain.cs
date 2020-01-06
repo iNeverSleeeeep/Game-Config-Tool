@@ -8,7 +8,7 @@ namespace GCT
 {
     public class GCTMain
     {
-        [MenuItem("Xiyou/导出全部Excel")]
+        [MenuItem("配置档工具/导出全部Excel")]
         static void ExportAllExpcels()
         {
             var sw = new Stopwatch();

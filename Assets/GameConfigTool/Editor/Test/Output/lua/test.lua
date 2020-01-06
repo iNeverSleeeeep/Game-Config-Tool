@@ -7,6 +7,6 @@ local default = {
     },
 }
 return s(default, { __index = function(t, k)
-    if k == 1 then return require("luaConfig.test0")[k] end
-    if k == 2 then return require("luaConfig.test1")[k] end
+    if k == 1 then return require("config.test0")[k] end
+    if k == 2 then return require("config.test1")[k] end
 end})

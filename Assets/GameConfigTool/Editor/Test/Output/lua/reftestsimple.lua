@@ -4,6 +4,6 @@ local m = { __index = function(t, k) return r(t, a[k]) end}
 local default = {
 }
 return s(default, { __index = function(t, k)
-    if k >= 1 and k < 3 then return require("luaConfig.reftestsimple0")[k] end
-    if k >= 4 and k < 100 then return require("luaConfig.reftestsimple1")[k] end
+    if k >= 1 and k < 3 then return require("config.reftestsimple0")[k] end
+    if k >= 4 and k < 100 then return require("config.reftestsimple1")[k] end
 end})
