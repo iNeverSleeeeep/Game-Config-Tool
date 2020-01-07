@@ -30,7 +30,7 @@
 ### 使用方法
 - 编辑GCTSettings.asset，配置好Excel路径，导出路径，protoc路径等
 - 参考Test目录下的Excel和Include目录，制作你自己的配置档
-- 点击Unity->Xiyou->导出全部excel，导出配置档
+- Unity->配置档工具->导出全部excel，导出配置档
 
 ### 用到的第三方代码
 - 使用npoi进行excel加载，为了兼容.net3.5，对源码进行了一些简单修改。
