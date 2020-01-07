@@ -1,4 +1,5 @@
 ﻿using NPOI.SS.UserModel;
+using System;
 using System.Collections.Generic;
 
 namespace GCT
@@ -14,18 +15,37 @@ namespace GCT
 
         public static readonly string Mark = "是";
         
-        public IDictionary<string, GCTField> Fields = new SortedDictionary<string, GCTField>();
+        public IDictionary<string, GCTField> Fields;
         public IList<string> Titles = new List<string>();
         public List<string> KeyTitles { get; private set; }
         public List<string> Keys { get; private set; }
         public int KeyCount { get { return Keys.Count; } }
 
+        #region FieldSorter
+        internal class FieldSorter : IComparer<string>
+        {
+            IList<string> titles;
+            public FieldSorter(IList<string> titles)
+            {
+                this.titles = titles;
+            }
+            public int Compare(string x, string y)
+            {
+                int xIndex = titles.IndexOf(x);
+                int yIndex = titles.IndexOf(y);
+                return xIndex.CompareTo(yIndex);
+            }
+        }
+        #endregion
+
         public GCTSchema(ISheet sheet, IRow dataTitleRow)
         {
+
             var rows = sheet.GetRowEnumerator();
             rows.MoveNext();
             var titleRow = rows.Current as IRow;
             Titles = GetTitles(titleRow);
+            Fields = new SortedDictionary<string, GCTField>(new FieldSorter(Titles));
             foreach (var title in Titles)
             {
                 var columnCount = GetFieldColumnCount(dataTitleRow.Cells, title);

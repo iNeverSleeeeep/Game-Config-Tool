@@ -11,16 +11,20 @@ namespace GCT
         public int Value;
         public string Key;
         public string Describe;
+        public int Index;
 
         public override string ToString()
         {
             return Value.ToString();
         }
+
+        public static Keyword Empty = new Keyword();
     }
     internal static class GCTKeywords
     {
         public static IDictionary<string, object> keywords = new Dictionary<string, object>();
         private static Dictionary<string, Dictionary<string, Keyword>> lookup = new Dictionary<string, Dictionary<string, Keyword>>();
+        private static Dictionary<string, List<string>> fieldsKeys = new Dictionary<string, List<string>>();
 
 
         public static int GetValue(string type, string key)
@@ -40,9 +44,41 @@ namespace GCT
             int value = 0;
             foreach (var key in keys)
             {
-                value |= GetValue(type, key);
+                if (string.IsNullOrEmpty(key) == false)
+                    value |= GetValue(type, key);
             }
             return value;
+        }
+
+        public static List<string> GetMaskKeys(string type)
+        {
+            return fieldsKeys[type];
+        }
+
+        public static string GetMaskText(string type, int value)
+        {
+            string text = "";
+            foreach (var keyword in lookup[type] as IDictionary<string, Keyword>)
+            {
+                if ((keyword.Value.Value & value) != 0 && text.Contains(keyword.Value.Name) == false)
+                {
+                    if (string.IsNullOrEmpty(text))
+                        text = keyword.Key;
+                    else
+                        text = text + "|" + keyword.Key;
+                }
+            }
+            return text;
+        }
+
+        public static int GetIndex(string type, int value)
+        {
+            return (lookup[type][value.ToString()] as Keyword).Index;
+        }
+
+        public static string GetKeyByIndex(string type, int index)
+        {
+            return fieldsKeys[type][index];
         }
 
         public static string GetDescribe(string type, string key)
@@ -60,6 +96,7 @@ namespace GCT
         {
             lookup.Clear();
             keywords.Clear();
+            fieldsKeys.Clear();
             var path = GCTSettings.Instance.IncludePath + "/keywords.proto";
             var lines = File.ReadAllLines(path);
             string type = null;
@@ -70,6 +107,14 @@ namespace GCT
                     type = GetKeywordType(line);
                     lookup.Add(type, new Dictionary<string, Keyword>());
                     keywords.Add(type, new Dictionary<string, object>());
+                    fieldsKeys.Add(type, new List<string>());
+                    if (type.Contains("Mask") == false)
+                    {
+                        lookup[type][" "] = Keyword.Empty;
+                        lookup[type]["0"] = Keyword.Empty;
+                        (keywords[type] as IDictionary<string, object>)[" "] = 0;
+                        fieldsKeys[type].Add(" ");
+                    }
                 }
                 else if (line.Contains("}"))
                     type = null;
@@ -77,7 +122,11 @@ namespace GCT
                 {
                     var keyword = GetKeyword(line);
                     lookup[type][keyword.Key] = keyword;
+                    lookup[type][keyword.Value.ToString()] = keyword;
                     (keywords[type] as IDictionary<string, object>)[keyword.Name] = keyword.Value;
+
+                    keyword.Index = fieldsKeys[type].Count;
+                    fieldsKeys[type].Add(keyword.Key);
                     if (string.IsNullOrEmpty(keyword.Describe) == false)
                         (keywords[type] as IDictionary<string, object>)[keyword.Value.ToString()] = keyword.Describe;
                 }

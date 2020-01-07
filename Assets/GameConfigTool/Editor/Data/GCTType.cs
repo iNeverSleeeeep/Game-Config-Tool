@@ -3,6 +3,7 @@ using NPOI.SS.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace GCT
@@ -80,6 +81,12 @@ namespace GCT
             }
             return titles.Count - startIndex;
         }
+
+        public virtual void Draw(List<ICell> cells, List<string> titles)
+        {
+            var value = ToValue(cells, titles);
+            EditorGUILayout.LabelField(value.ToString());
+        }
     }
 
     internal class GCTTypeUInt32 : GCTType
@@ -95,6 +102,21 @@ namespace GCT
             if (cells[0] == null)
                 return null;
             return cells[0].NumericCellValue;
+        }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            string value = string.Empty;
+            if (cells[0] != null)
+                value = ToValue(cells, titles).ToString();
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                uint uint32Value = 0;
+                if (uint.TryParse(value, out uint32Value))
+                    cells[0].SetCellValue(uint32Value);
+            }
         }
     }
 
@@ -112,6 +134,21 @@ namespace GCT
                 return null;
             return cells[0].NumericCellValue;
         }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            string value = string.Empty;
+            if (cells[0] != null)
+                value = ToValue(cells, titles).ToString();
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                int int32Value = 0;
+                if (int.TryParse(value, out int32Value))
+                    cells[0].SetCellValue(int32Value);
+            }
+        }
     }
 
     internal class GCTTypeUInt64 : GCTType
@@ -127,6 +164,21 @@ namespace GCT
             if (cells[0] == null)
                 return null;
             return cells[0].NumericCellValue;
+        }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            string value = string.Empty;
+            if (cells[0] != null)
+                value = ToValue(cells, titles).ToString();
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ulong uint64Value = 0;
+                if (ulong.TryParse(value, out uint64Value))
+                    cells[0].SetCellValue(uint64Value);
+            }
         }
     }
 
@@ -144,6 +196,21 @@ namespace GCT
                 return null;
             return cells[0].NumericCellValue;
         }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            string value = string.Empty;
+            if (cells[0] != null)
+                value = ToValue(cells, titles).ToString();
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                long int64Value = 0;
+                if (long.TryParse(value, out int64Value))
+                    cells[0].SetCellValue(int64Value);
+            }
+        }
     }
 
     internal class GCTTypeDouble : GCTType
@@ -159,6 +226,21 @@ namespace GCT
             if (cells[0] == null)
                 return null;
             return cells[0].NumericCellValue;
+        }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            string value = string.Empty;
+            if (cells[0] != null)
+                value = ToValue(cells, titles).ToString();
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                double doubleValue = 0;
+                if (double.TryParse(value, out doubleValue))
+                    cells[0].SetCellValue(doubleValue);
+            }
         }
     }
 
@@ -176,6 +258,21 @@ namespace GCT
                 return null;
             return cells[0].NumericCellValue;
         }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            string value = string.Empty;
+            if (cells[0] != null)
+                value = ToValue(cells, titles).ToString();
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                float floatValue = 0;
+                if (float.TryParse(value, out floatValue))
+                    cells[0].SetCellValue(floatValue);
+            }
+        }
     }
 
     internal class GCTTypeBool : GCTType
@@ -191,6 +288,19 @@ namespace GCT
             if (cells[0] == null)
                 return null;
             return cells[0].StringCellValue == "是";
+        }
+
+        private static string[] Display = new string[] { "否", "是" };
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            if (cells[0] == null)
+                return;
+            var value = (bool)ToValue(cells, titles);
+            EditorGUI.BeginChangeCheck();
+            var result = EditorGUILayout.Popup(value ? 1 : 0, Display);
+            if (EditorGUI.EndChangeCheck())
+                cells[0].SetCellValue(Display[result]);
         }
     }
 
@@ -208,6 +318,17 @@ namespace GCT
                 return null;
             return cells[0].Value();
         }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            string value = string.Empty;
+            if (cells[0] != null)
+                value = ToValue(cells, titles).ToString();
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+                cells[0].SetCellValue(value);
+        }
     }
 
     internal class GCTTypeKeywords : GCTType
@@ -224,6 +345,31 @@ namespace GCT
             if (cells[0] == null)
                 return null;
             return GCTKeywords.GetMaskValue(ToString(), cells[0].Value());
+        }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            int value = 0;
+            if (cells[0] != null)
+                value = (int)ToValue(cells, titles);
+            if (ToString().EndsWith("Mask"))
+            {
+                var showMixedValue = EditorGUI.showMixedValue;
+                EditorGUI.showMixedValue = false;
+                EditorGUI.BeginChangeCheck();
+                value = EditorGUILayout.MaskField(value, GCTKeywords.GetMaskKeys(ToString()).ToArray());
+                if (EditorGUI.EndChangeCheck())
+                    cells[0].SetCellValue(GCTKeywords.GetMaskText(ToString(), value));
+                EditorGUI.showMixedValue = showMixedValue;
+            }
+            else
+            {
+                var index = GCTKeywords.GetIndex(ToString(), value);
+                EditorGUI.BeginChangeCheck();
+                index = EditorGUILayout.Popup(index, GCTKeywords.GetMaskKeys(ToString()).ToArray());
+                if (EditorGUI.EndChangeCheck())
+                    cells[0].SetCellValue(GCTKeywords.GetKeyByIndex(ToString(), index));
+            }
         }
     }
 
@@ -323,6 +469,7 @@ namespace GCT
         {
             m_Field = new GCTField(string.Empty);
             m_Field.Type = GCTTypeCreator.New(GCTTypeCreator.FullTypeName(type));
+            m_Field.IsOptional = true;
         }
 
         public override string ToString() { return m_Type; }
@@ -370,6 +517,26 @@ namespace GCT
                 arrayIndex++;
             }
             return true;
+        }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            if (cells[0] == null)
+                return;
+            var title = titles[0].Substring(0, titles[0].IndexOf("[0]"));
+            int arrayIndex = 0;
+            for (var startIndex = 0; startIndex < cells.Count;)
+            {
+                var titleIndex = title + string.Format("[{0}]", arrayIndex);
+                var length = GetArrayLength(titles, startIndex, titleIndex);
+                var subtitles = titles.GetRange(startIndex, length);
+
+                EditorGUILayout.BeginHorizontal();
+                m_Field.Type.Draw(cells.GetRange(startIndex, length), subtitles);
+                EditorGUILayout.EndHorizontal();
+                startIndex += length;
+                arrayIndex++;
+            }
         }
     }
 
@@ -513,6 +680,15 @@ namespace GCT
             if (cells[0] == null)
                 return null;
             return SharpJson.JsonDecoder.DecodeText(cells[0].StringCellValue);
+        }
+
+        public override void Draw(List<ICell> cells, List<string> titles)
+        {
+            var value = ToValue(cells, titles) as string;
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUILayout.TextField(value);
+            if (EditorGUI.EndChangeCheck())
+                cells[0].SetCellValue(value);
         }
     }
 }

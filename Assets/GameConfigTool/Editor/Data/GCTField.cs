@@ -71,7 +71,7 @@ namespace GCT
         {
             var value = Type.ToValue(cells, titles);
             if (IsOptional == false && value == null)
-                throw new System.Exception(Title+"不是选填字段:");
+                throw new System.Exception(Title + "不是选填字段:");
             return value;
         }
 

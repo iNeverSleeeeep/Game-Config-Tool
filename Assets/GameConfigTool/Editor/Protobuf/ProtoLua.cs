@@ -49,12 +49,12 @@ namespace GCT
                 if (field.IsClient)
                 {
                     keyIndex.Add(field.Name, index);
-                    keys.AppendFormat("{0} = {1}, ", field.Name, index++);
+                    keys.AppendFormat(" {0} = {1},", field.Name, index++);
                 }
             }
-            keys.Length -= 2;
+            keys.Length -= 1;
             keys.Append(" }\n");
-            keys.Append("local m = { __index = function(t, k) return r(t, a[k]) end}\n");
+            keys.Append("local m = { __index = function(t, k) return r(t, a[k]) end, __newindex = function() end }\n");
 
             if (excel.Config.IsClientSlice)
             {
@@ -73,7 +73,7 @@ namespace GCT
                 var defaultSb = new StringBuilder();
                 var defaultIndent = new Indent();
                 defaultSb.Append(keys);
-                defaultSb.Append("local default = {\n");
+                defaultSb.Append("local d = {\n");
                 defaultIndent++;
                 
                 GenerateTable(table.Data, keyIndex, 0, excel.Schema.KeyCount, defaultSb, defaultIndent, sbList, indentList, excel.Config.Slices, true);
@@ -89,14 +89,14 @@ namespace GCT
                     FileHelper.WriteAllText(path, sbList[i].ToString());
                 }
 
-                defaultSb.Append("return s(default, { __index = function(t, k)\n");
+                defaultSb.Append("return s(d, { __index = function(t, k)\n");
                 for (var i = 0; i < excel.Config.Slices.Count; ++i)
                 {
                     var slice = excel.Config.Slices[i];
                     defaultSb.AppendFormat("    if {1} then return require(\"{3}{0}{2}\")[k] end\n", excel.name, slice.ToString("k"), i, GCTSettings.Instance.LuaRequirePath);
                 }
 
-                defaultSb.Append("end})\n");
+                defaultSb.Append("end, __newindex = function() end })\n");
                 var defaultPath = excel.path.Replace("xlsx", "lua").Replace(GCTSettings.Instance.ExcelPath, GCTSettings.Instance.OutputPath + "/lua");
                 FileHelper.WriteAllText(defaultPath, defaultSb.ToString());
             }
@@ -231,9 +231,10 @@ namespace GCT
                 var index = 0;
                 foreach (var pair in table)
                 {
-                    index++;
-                    
                     var key = pair.Key;
+                    if (string.IsNullOrEmpty(key.Trim()))
+                        continue;
+                    index++;
 
                     int value = 0;
                     if (keyIndex == null)

@@ -8,14 +8,19 @@ namespace GCT
 {
     internal class GCTRowTable : IDictionary<string, object>
     {
-        public IDictionary<string, object> Data = new SortedDictionary<string, object>();
-        public IDictionary<string, bool> Client = new SortedDictionary<string, bool>();
-        public IDictionary<string, bool> Server = new SortedDictionary<string, bool>();
+        public IDictionary<string, object> Data;
+        public IDictionary<string, bool> Client;
+        public IDictionary<string, bool> Server;
+        
+        public List<List<ICell>> FieldCells = new List<List<ICell>>();
+        public List<List<ICell>> FieldTitles = new List<List<ICell>>();
 
         public IRow Row { get; private set; }
         public IRow TitleRow { get; private set; }
         public GCTSchema Schema { get; private set; }
         public GCTExcel Excel { get; private set; }
+
+        private string m_Keys;
 
         #region IDictionary
         public object this[string key] { get { return Data[key]; } set { Data[key] = value; } }
@@ -86,13 +91,45 @@ namespace GCT
         }
         #endregion
 
+        #region DataSorter
+        private class DataSorter : IComparer<string>
+        {
+            private GCTExcel m_Excel;
+            public DataSorter(GCTExcel excel)
+            {
+                m_Excel = excel;
+            }
+            public int Compare(string x, string y)
+            {
+                int xIndex = -1;
+                int yIndex = -1;
+                int index = 0;
+                foreach (var field in m_Excel.Schema.Fields.Values)
+                {
+                    if (x == field.Name) xIndex = index;
+                    if (y == field.Name) yIndex = index;
+                    if (xIndex >= 0 && yIndex >= 0)
+                        break;
+                    index++;
+                }
+                return xIndex.CompareTo(yIndex);
+            }
+        }
+
+        #endregion
+
         public GCTRowTable(IRow row, IRow titleRow, GCTExcel excel)
         {
+            Data = new SortedDictionary<string, object>(new DataSorter(excel));
+            Client = new SortedDictionary<string, bool>();
+            Server = new SortedDictionary<string, bool>();
+            
             Row = row;
             TitleRow = titleRow;
             Schema = excel.Schema;
             Excel = excel;
 
+            bool addString = true;
             for (var column = 0; column < titleRow.LastCellNum;)
             {
                 var titleCell = titleRow.GetCell(column);
@@ -110,28 +147,42 @@ namespace GCT
                 {
                     Debugger.LogError("title重复" + field.Name);
                 }
-                List<ICell> cells = null;
-                if (row.Cells.Count >= column + field.ColumnCount)
-                    cells = row.Cells.GetRange(column, field.ColumnCount);
-                else
+                List<ICell> cells = new List<ICell>();
+                for (var i = column; i < column + field.ColumnCount; ++i)
                 {
-                    cells = new List<ICell>();
-                    for (var i = 0; i < field.ColumnCount; ++i)
-                        cells.Add(null);
+                    var currentCell = Row.GetCell(i);
+                    if (currentCell == null)
+                        currentCell = Row.CreateCell(i);
+                    cells.Add(currentCell);
                 }
-                var titleCells = titleRow.Cells.GetRange(column, field.ColumnCount);
                 var titles = new List<string>();
                 for (var i = column; i < column + field.ColumnCount; ++i)
+                {
                     titles.Add(titleRow.Cells[i].StringCellValue);
+                }
                 var fieldValue = field.Value(cells, titles);
                 if (fieldValue != null)
                 {
+                    FieldCells.Add(cells);
+                    FieldTitles.Add(titleRow.Cells.GetRange(column, field.ColumnCount));
                     Data.Add(field.Name, fieldValue);
                     Client.Add(field.Name, field.IsClient);
                     Server.Add(field.Name, field.IsServer);
                 }
 
                 column += field.ColumnCount;
+                if (field.IsKey)
+                {
+                    if (string.IsNullOrEmpty(m_Keys))
+                        m_Keys = cell.ToString();
+                    else
+                        m_Keys = m_Keys + "-" + cell.ToString();
+                }
+                else if (addString && cell != null && string.IsNullOrEmpty(m_Keys) == false && field.Type is GCTTypeString)
+                {
+                    addString = false;
+                    m_Keys = m_Keys + ":" + cell.ToString();
+                }
             }
         }
         
@@ -150,24 +201,30 @@ namespace GCT
                     continue;
                 }
                 var field = Schema.Fields[maintitle];
-                List<ICell> cells = null;
-                if (Row.Cells.Count >= column + field.ColumnCount)
-                    cells = Row.Cells.GetRange(column, field.ColumnCount);
-                else
+                List<ICell> cells = new List<ICell>();
+                for (var i = column; i < column + field.ColumnCount; ++i)
                 {
-                    cells = new List<ICell>();
-                    for (var i = 0; i < field.ColumnCount; ++i)
-                        cells.Add(null);
+                    var currentCell = Row.GetCell(i);
+                    if (currentCell == null)
+                        currentCell = Row.CreateCell(i);
+                    cells.Add(currentCell);
                 }
                 var titleCells = TitleRow.Cells.GetRange(column, field.ColumnCount);
                 var titles = new List<string>();
                 for (var i = column; i < column + field.ColumnCount; ++i)
+                {
                     titles.Add(TitleRow.Cells[i].StringCellValue);
+                }
                 if (field.Type.Check(cells, titles) == false)
                     Debugger.LogError(string.Format("检查失败 Excel:{0} Title:{1} 行号:{2}", Excel.name, field.Title, Row.RowNum));
-
+                ListPool<string>.Release(titles);
                 column += field.ColumnCount;
             }
+        }
+
+        public override string ToString()
+        {
+            return m_Keys;
         }
 
         private static int GetArrayLength(IRow titleRow, string name, int startColumn, int memberCount)

@@ -34,12 +34,20 @@ namespace GCT
             {
                 var newpath = file.Replace("/proto", "/protolua") + ".bytes";
                 FileHelper.MakeSureDirectory(newpath);
-                var arguments = string.Format(" -o {0} {1}", newpath, FileHelper.GetFileName(file));
-                var processInfo = new ProcessStartInfo(GCTSettings.Instance.Protoc, arguments);
-                processInfo.WorkingDirectory = FileHelper.GetDirectoryName(file);
-                var process = Process.Start(processInfo);
-                process.ErrorDataReceived += (sender, e) => Debugger.LogError(e.Data);
-                process.OutputDataReceived += (sender, e) => Debugger.Log(e.Data);
+                var process = new Process();
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.FileName = GCTSettings.Instance.Protoc;
+                process.StartInfo.WorkingDirectory = FileHelper.GetDirectoryName(file);
+                process.StartInfo.Arguments = string.Format(" -o \"{0}\" {1}", newpath, FileHelper.GetFileName(file));
+                process.Start();
+                string output = process.StandardOutput.ReadToEnd();
+                if (string.IsNullOrEmpty(output) == false)
+                    Debugger.Log(output);
+                output = process.StandardError.ReadToEnd();
+                if (string.IsNullOrEmpty(output) == false)
+                    Debugger.LogError(output);
                 process.WaitForExit();
             }
             sw.Stop();
