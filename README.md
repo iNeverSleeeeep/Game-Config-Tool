@@ -20,6 +20,7 @@
 - 导出时不需要关闭excel
 
 ### 未来计划(到达一定star后完成)
+- 导出golang支持（配合我的[INServer](https://github.com/iNeverSleeeeep/INServer)使用）
 - 配置档填错时更好的错误提示(30 star)
 - 更好的lua table压缩版本，占用更少的内存（通过键的重排序）(10 star)
 - 在Unity中的可视化编辑界面。(500 star)
